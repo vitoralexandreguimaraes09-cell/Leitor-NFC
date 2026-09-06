@@ -603,11 +603,248 @@ function calcular() {
 
 /*
 ========================================
+VERIFICAR NFC
+========================================
+*/
+
+async function verificarNFC() {
+
+    if (!("NDEFReader" in window)) {
+
+        alert(
+            "❌ Web NFC não está disponível neste navegador."
+        );
+
+        return false;
+
+    }
+
+
+    try {
+
+        const ndef =
+            new NDEFReader();
+
+
+        await ndef.scan();
+
+
+        alert(
+            "📲 Aproxime o cartão NFC..."
+        );
+
+
+        return await new Promise(
+            (resolve) => {
+
+                let finalizado =
+                    false;
+
+
+                ndef.addEventListener(
+                    "reading",
+                    ({ serialNumber }) => {
+
+                        if (finalizado) {
+
+                            return;
+
+                        }
+
+
+                        finalizado =
+                            true;
+
+
+                        console.log(
+                            "Cartão detectado:",
+                            serialNumber
+                        );
+
+
+                        if (
+                            serialNumber ===
+                            "d7:4c:70:b1"
+                        ) {
+
+                            alert(
+                                "✅ Cartão autorizado!"
+                            );
+
+
+                            resolve(
+                                true
+                            );
+
+                        }
+
+                        else {
+
+                            alert(
+                                "❌ Cartão não autorizado."
+                            );
+
+
+                            resolve(
+                                false
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                ndef.addEventListener(
+                    "readingerror",
+                    () => {
+
+                        if (finalizado) {
+
+                            return;
+
+                        }
+
+
+                        finalizado =
+                            true;
+
+
+                        alert(
+                            "❌ Não foi possível ler o cartão."
+                        );
+
+
+                        resolve(
+                            false
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        alert(
+            "❌ Erro ao iniciar o NFC:\n" +
+            erro.message
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/*
+========================================
 AVALIAÇÕES
 ========================================
 */
 
-function enviarAvaliacao() {
+async function verAvaliacoes() {
+
+    const autorizado =
+        await verificarNFC();
+
+
+    if (!autorizado) {
+
+        return;
+
+    }
+
+
+    mostrar(
+        "avaliacoes"
+    );
+
+}
+
+
+function carregarListaAvaliacoes() {
+
+    const lista =
+        document.getElementById(
+            "listaAvaliacoes"
+        );
+
+
+    const avaliacoes =
+        carregarAvaliacoes();
+
+
+    lista.innerHTML = "";
+
+
+    if (
+        avaliacoes.length === 0
+    ) {
+
+        lista.innerHTML =
+            "<p>Não há avaliações.</p>";
+
+        return;
+
+    }
+
+
+    avaliacoes.forEach(
+        avaliacao => {
+
+            const elemento =
+                document.createElement(
+                    "div"
+                );
+
+
+            elemento.className =
+                "avaliacao";
+
+
+            elemento.innerHTML =
+
+                "<strong>" +
+                escapeHTML(
+                    avaliacao.nome
+                ) +
+                "</strong>" +
+
+                "<div class='nota'>" +
+                "⭐ " +
+                avaliacao.nota +
+                "/10" +
+                "</div>" +
+
+                "<p>" +
+                escapeHTML(
+                    avaliacao.comentario
+                ) +
+                "</p>";
+
+
+            lista.appendChild(
+                elemento
+            );
+
+        }
+    );
+
+}
+
+
+async function enviarAvaliacao() {
 
     if (!usuarioLogado) {
 
@@ -710,97 +947,22 @@ function enviarAvaliacao() {
 
 /*
 ========================================
-VER AVALIAÇÕES
+LIMPAR AVALIAÇÕES
 ========================================
 */
 
-function verAvaliacoes() {
+async function limparAvaliacoes() {
 
-    mostrar(
-        "avaliacoes"
-    );
-
-}
+    const autorizado =
+        await verificarNFC();
 
 
-function carregarListaAvaliacoes() {
-
-    const lista =
-        document.getElementById(
-            "listaAvaliacoes"
-        );
-
-
-    const avaliacoes =
-        carregarAvaliacoes();
-
-
-    lista.innerHTML = "";
-
-
-    if (
-        avaliacoes.length === 0
-    ) {
-
-        lista.innerHTML =
-            "<p>Não há avaliações.</p>";
+    if (!autorizado) {
 
         return;
 
     }
 
-
-    avaliacoes.forEach(
-        avaliacao => {
-
-            const elemento =
-                document.createElement(
-                    "div"
-                );
-
-
-            elemento.className =
-                "avaliacao";
-
-
-            elemento.innerHTML =
-
-                "<strong>" +
-                escapeHTML(
-                    avaliacao.nome
-                ) +
-                "</strong>" +
-
-                "<div class='nota'>" +
-                "⭐ " +
-                avaliacao.nota +
-                "/10" +
-                "</div>" +
-
-                "<p>" +
-                escapeHTML(
-                    avaliacao.comentario
-                ) +
-                "</p>";
-
-
-            lista.appendChild(
-                elemento
-            );
-
-        }
-    );
-
-}
-
-
-/*
-========================================
-LIMPAR AVALIAÇÕES
-========================================
-*/
-
-function limparAvaliacoes() {
 
     const confirmacao =
         confirm(
@@ -821,6 +983,11 @@ function limparAvaliacoes() {
 
 
     carregarListaAvaliacoes();
+
+
+    alert(
+        "✅ Todas as avaliações foram apagadas."
+    );
 
 }
 
