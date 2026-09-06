@@ -103,9 +103,11 @@ function mostrar(id) {
 
     telas.forEach(
         tela => {
+
             tela.classList.remove(
                 "ativa"
             );
+
         }
     );
 
@@ -393,13 +395,175 @@ function sair() {
 
 /*
 ========================================
+NFC
+========================================
+*/
+
+async function verificarNFC() {
+
+    if (!("NDEFReader" in window)) {
+
+        alert(
+            "❌ Web NFC não está disponível neste navegador."
+        );
+
+        return false;
+
+    }
+
+
+    try {
+
+        const ndef =
+            new NDEFReader();
+
+
+        await ndef.scan();
+
+
+        alert(
+            "📲 Aproxime o cartão NFC..."
+        );
+
+
+        return await new Promise(
+            (resolve) => {
+
+                let finalizado =
+                    false;
+
+
+                ndef.addEventListener(
+                    "reading",
+                    ({ serialNumber }) => {
+
+                        if (finalizado) {
+
+                            return;
+
+                        }
+
+
+                        finalizado =
+                            true;
+
+
+                        console.log(
+                            "NFC:",
+                            serialNumber
+                        );
+
+
+                        if (
+                            serialNumber ===
+                            "d7:4c:70:b1"
+                        ) {
+
+                            alert(
+                                "✅ Cartão autorizado!"
+                            );
+
+
+                            resolve(
+                                true
+                            );
+
+                        }
+
+                        else {
+
+                            alert(
+                                "❌ Cartão não autorizado."
+                            );
+
+
+                            resolve(
+                                false
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                ndef.addEventListener(
+                    "readingerror",
+                    () => {
+
+                        if (finalizado) {
+
+                            return;
+
+                        }
+
+
+                        finalizado =
+                            true;
+
+
+                        alert(
+                            "❌ Não foi possível ler o cartão."
+                        );
+
+
+                        resolve(
+                            false
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+    catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        alert(
+            "❌ Erro ao iniciar o NFC:\n" +
+            erro.message
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/*
+========================================
 EXCLUIR CONTA
 ========================================
 */
 
-function excluirConta() {
+async function excluirConta() {
 
     if (!usuarioLogado) {
+
+        return;
+
+    }
+
+
+    /*
+    PRIMEIRO:
+    exige o cartão NFC
+    */
+
+    const autorizado =
+        await verificarNFC();
+
+
+    if (!autorizado) {
 
         return;
 
@@ -468,7 +632,8 @@ function excluirConta() {
     );
 
 
-    usuarioLogado = null;
+    usuarioLogado =
+        null;
 
 
     mensagem.innerText =
@@ -603,152 +768,6 @@ function calcular() {
 
 /*
 ========================================
-VERIFICAR NFC
-========================================
-*/
-
-async function verificarNFC() {
-
-    if (!("NDEFReader" in window)) {
-
-        alert(
-            "❌ Web NFC não está disponível neste navegador."
-        );
-
-        return false;
-
-    }
-
-
-    try {
-
-        const ndef =
-            new NDEFReader();
-
-
-        await ndef.scan();
-
-
-        alert(
-            "📲 Aproxime o cartão NFC..."
-        );
-
-
-        return await new Promise(
-            (resolve) => {
-
-                let finalizado =
-                    false;
-
-
-                ndef.addEventListener(
-                    "reading",
-                    ({ serialNumber }) => {
-
-                        if (finalizado) {
-
-                            return;
-
-                        }
-
-
-                        finalizado =
-                            true;
-
-
-                        console.log(
-                            "Cartão detectado:",
-                            serialNumber
-                        );
-
-
-                        if (
-                            serialNumber ===
-                            "d7:4c:70:b1"
-                        ) {
-
-                            alert(
-                                "✅ Cartão autorizado!"
-                            );
-
-
-                            resolve(
-                                true
-                            );
-
-                        }
-
-                        else {
-
-                            alert(
-                                "❌ Cartão não autorizado."
-                            );
-
-
-                            resolve(
-                                false
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                ndef.addEventListener(
-                    "readingerror",
-                    () => {
-
-                        if (finalizado) {
-
-                            return;
-
-                        }
-
-
-                        finalizado =
-                            true;
-
-
-                        alert(
-                            "❌ Não foi possível ler o cartão."
-                        );
-
-
-                        resolve(
-                            false
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            erro
-        );
-
-
-        alert(
-            "❌ Erro ao iniciar o NFC:\n" +
-            erro.message
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/*
-========================================
 AVALIAÇÕES
 ========================================
 */
@@ -844,7 +863,7 @@ function carregarListaAvaliacoes() {
 }
 
 
-async function enviarAvaliacao() {
+function enviarAvaliacao() {
 
     if (!usuarioLogado) {
 
@@ -953,6 +972,10 @@ LIMPAR AVALIAÇÕES
 
 async function limparAvaliacoes() {
 
+    /*
+    Exige NFC novamente.
+    */
+
     const autorizado =
         await verificarNFC();
 
@@ -1025,15 +1048,134 @@ window.addEventListener(
     "load",
     () => {
 
-        if (usuarioLogado) {
+        const acesso =
+            sessionStorage.getItem(
+                "acessoSistema"
+            );
 
-            mostrar("painel");
+
+        if (acesso) {
+
+            /*
+            O index foi aberto pelo teste.html.
+            */
+
+            sessionStorage.removeItem(
+                "acessoSistema"
+            );
+
+
+            document.documentElement
+                .classList.remove(
+                    "sem-acesso"
+                );
+
+
+            const sistema =
+                document.getElementById(
+                    "sistema"
+                );
+
+
+            const bloqueio =
+                document.getElementById(
+                    "bloqueio"
+                );
+
+
+            sistema.style.display =
+                "block";
+
+
+            bloqueio.style.display =
+                "none";
+
+
+            if (usuarioLogado) {
+
+                mostrar("painel");
+
+            }
+
+            else {
+
+                mostrar("login");
+
+            }
 
         }
 
         else {
 
-            mostrar("login");
+            const sistema =
+                document.getElementById(
+                    "sistema"
+                );
+
+
+            const bloqueio =
+                document.getElementById(
+                    "bloqueio"
+                );
+
+
+            sistema.style.display =
+                "none";
+
+
+            bloqueio.style.display =
+                "flex";
+
+        }
+
+    }
+);
+
+
+/*
+========================================
+PROTEÇÃO CONTRA VOLTAR/RESTAURAR PÁGINA
+========================================
+*/
+
+window.addEventListener(
+    "pageshow",
+    () => {
+
+        const acesso =
+            sessionStorage.getItem(
+                "acessoSistema"
+            );
+
+
+        if (!acesso) {
+
+            const sistema =
+                document.getElementById(
+                    "sistema"
+                );
+
+
+            const bloqueio =
+                document.getElementById(
+                    "bloqueio"
+                );
+
+
+            if (sistema) {
+
+                sistema.style.display =
+                    "none";
+
+            }
+
+
+            if (bloqueio) {
+
+                bloqueio.style.display =
+                    "flex";
+
+            }
 
         }
 
