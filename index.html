@@ -13,6 +13,33 @@
     <title>Sistema</title>
 
 
+    <!-- ======================================== -->
+    <!-- AUTORIZAÇÃO NFC -->
+    <!-- ======================================== -->
+
+    <script>
+
+        window.nfcAutorizado = false;
+
+
+        if (
+            sessionStorage.getItem(
+                "acessoSistema"
+            )
+        ) {
+
+            window.nfcAutorizado = true;
+
+
+            sessionStorage.removeItem(
+                "acessoSistema"
+            );
+
+        }
+
+    </script>
+
+
     <style>
 
         * {
@@ -43,24 +70,12 @@
         }
 
 
-        /*
-        ========================================
-        SISTEMA ESCONDIDO ATÉ AUTORIZAR
-        ========================================
-        */
-
         #sistema {
 
             display: none;
 
         }
 
-
-        /*
-        ========================================
-        TELA DE BLOQUEIO
-        ========================================
-        */
 
         #bloqueio {
 
@@ -112,12 +127,6 @@
 
         }
 
-
-        /*
-        ========================================
-        SISTEMA
-        ========================================
-        */
 
         .container {
 
@@ -316,65 +325,6 @@
                 1px solid #444;
 
             margin: 25px 0;
-
-        }
-
-    </style>
-
-
-    <!-- ======================================== -->
-    <!-- VERIFICAÇÃO INICIAL -->
-    <!-- ======================================== -->
-
-    <script>
-
-        function verificarAcessoPagina() {
-
-            const acesso =
-                sessionStorage.getItem(
-                    "acessoSistema"
-                );
-
-
-            if (acesso) {
-
-                return true;
-
-            }
-
-
-            return false;
-
-        }
-
-
-        /*
-        ========================================
-        SE NÃO TIVER ACESSO
-        ========================================
-        */
-
-        if (!verificarAcessoPagina()) {
-
-            document.documentElement.classList.add(
-                "sem-acesso"
-            );
-
-        }
-
-    </script>
-
-
-    <style>
-
-        /*
-        Se não houver autorização,
-        esconde completamente o sistema.
-        */
-
-        html.sem-acesso #sistema {
-
-            display: none !important;
 
         }
 
@@ -761,101 +711,61 @@
     </div>
 
 
-    <!-- ======================================== -->
-    <!-- APP.JS -->
-    <!-- ======================================== -->
-
     <script src="app.js"></script>
 
 
     <!-- ======================================== -->
-    <!-- CONTROLE FINAL DA PÁGINA -->
+    <!-- CONTROLE DA AUTORIZAÇÃO -->
     <!-- ======================================== -->
 
     <script>
-
-        function atualizarBloqueioPagina() {
-
-            const acesso =
-                sessionStorage.getItem(
-                    "acessoSistema"
-                );
-
-
-            const sistema =
-                document.getElementById(
-                    "sistema"
-                );
-
-
-            const bloqueio =
-                document.getElementById(
-                    "bloqueio"
-                );
-
-
-            if (acesso) {
-
-                sistema.style.display =
-                    "block";
-
-                bloqueio.style.display =
-                    "none";
-
-            }
-
-            else {
-
-                sistema.style.display =
-                    "none";
-
-                bloqueio.style.display =
-                    "flex";
-
-            }
-
-        }
-
-
-        window.addEventListener(
-            "pageshow",
-            () => {
-
-                atualizarBloqueioPagina();
-
-            }
-        );
-
 
         window.addEventListener(
             "load",
             () => {
 
-                const acesso =
-                    sessionStorage.getItem(
-                        "acessoSistema"
+                const sistema =
+                    document.getElementById(
+                        "sistema"
+                    );
+
+                const bloqueio =
+                    document.getElementById(
+                        "bloqueio"
                     );
 
 
-                if (acesso) {
+                if (window.nfcAutorizado) {
 
-                    /*
-                    O acesso é consumido
-                    depois que o index foi aberto.
-                    */
+                    sistema.style.display =
+                        "block";
 
-                    sessionStorage.removeItem(
-                        "acessoSistema"
-                    );
+                    bloqueio.style.display =
+                        "none";
 
 
-                    atualizarBloqueioPagina();
+                    if (typeof usuarioLogado !== "undefined" &&
+                        usuarioLogado) {
+
+                        mostrar("painel");
+
+                    }
+
+                    else {
+
+                        mostrar("login");
+
+                    }
 
                 }
 
                 else {
 
-                    atualizarBloqueioPagina();
+                    sistema.style.display =
+                        "none";
+
+                    bloqueio.style.display =
+                        "flex";
 
                 }
 
