@@ -12,11 +12,82 @@
 
     <title>Sistema</title>
 
+
+    <!-- ======================================== -->
+    <!-- PROTEÇÃO NFC -->
+    <!-- ======================================== -->
+
+    <script>
+
+        const acesso =
+            sessionStorage.getItem(
+                "acessoSistema"
+            );
+
+
+        if (!acesso) {
+
+            document.documentElement.innerHTML = `
+
+                <body style="
+                    margin:0;
+                    min-height:100vh;
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                    background:#111;
+                    color:white;
+                    font-family:Arial,sans-serif;
+                    text-align:center;
+                ">
+
+                    <div>
+
+                        <h1>
+                            🚫 Acesso bloqueado
+                        </h1>
+
+                        <p>
+                            Você precisa autenticar
+                            um cartão NFC para acessar
+                            este sistema.
+                        </p>
+
+                    </div>
+
+                </body>
+
+            `;
+
+            throw new Error(
+                "Acesso não autorizado."
+            );
+
+        }
+
+
+        /*
+        Remove a autorização depois que
+        o sistema foi aberto.
+
+        Assim, se atualizar o index.html,
+        será necessário passar o cartão
+        novamente.
+        */
+
+        sessionStorage.removeItem(
+            "acessoSistema"
+        );
+
+    </script>
+
+
     <style>
 
         * {
             box-sizing: border-box;
         }
+
 
         body {
 
@@ -647,4 +718,4 @@
 
 </body>
 
-  </html>
+                </html>
