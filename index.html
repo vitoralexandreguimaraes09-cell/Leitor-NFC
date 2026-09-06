@@ -1,1041 +1,724 @@
-/*
-========================================
-DADOS
-========================================
-*/
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-let usuarioLogado =
-    localStorage.getItem(
-        "usuarioLogado"
-    );
+<head>
 
+    <meta charset="UTF-8">
 
-/*
-========================================
-FUNÇÕES DE DADOS
-========================================
-*/
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-function carregarUsuarios() {
-
-    const dados =
-        localStorage.getItem(
-            "usuarios"
-        );
-
-    if (!dados) {
-        return {};
-    }
-
-    try {
-
-        return JSON.parse(dados);
-
-    } catch (erro) {
-
-        console.error(erro);
-
-        return {};
-
-    }
-
-}
+    <title>Sistema</title>
 
 
-function salvarUsuarios(usuarios) {
+    <!-- ======================================== -->
+    <!-- PROTEÇÃO NFC -->
+    <!-- ======================================== -->
 
-    localStorage.setItem(
-        "usuarios",
-        JSON.stringify(usuarios)
-    );
+    <script>
 
-}
-
-
-function carregarAvaliacoes() {
-
-    const dados =
-        localStorage.getItem(
-            "avaliacoes"
-        );
-
-    if (!dados) {
-        return [];
-    }
-
-    try {
-
-        return JSON.parse(dados);
-
-    } catch (erro) {
-
-        console.error(erro);
-
-        return [];
-
-    }
-
-}
-
-
-function salvarAvaliacoes(avaliacoes) {
-
-    localStorage.setItem(
-        "avaliacoes",
-        JSON.stringify(avaliacoes)
-    );
-
-}
-
-
-/*
-========================================
-NAVEGAÇÃO
-========================================
-*/
-
-function mostrar(id) {
-
-    const telas =
-        document.querySelectorAll(
-            ".tela"
-        );
-
-    telas.forEach(
-        tela => {
-            tela.classList.remove(
-                "ativa"
+        const acesso =
+            sessionStorage.getItem(
+                "acessoSistema"
             );
-        }
-    );
 
 
-    const tela =
-        document.getElementById(id);
+        if (!acesso) {
 
+            document.documentElement.innerHTML = `
 
-    if (tela) {
+                <body style="
+                    margin: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background: #111;
+                    color: white;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                ">
 
-        tela.classList.add(
-            "ativa"
-        );
+                    <div>
 
-    }
+                        <h1>
+                            🚫 Acesso bloqueado
+                        </h1>
 
+                        <p>
+                            Você precisa passar o cartão NFC
+                            para acessar este sistema.
+                        </p>
 
-    if (id === "painel") {
+                    </div>
 
-        atualizarPainel();
+                </body>
 
-    }
+            `;
 
-
-    if (id === "configuracoes") {
-
-        atualizarConfiguracoes();
-
-    }
-
-
-    if (id === "avaliacoes") {
-
-        carregarListaAvaliacoes();
-
-    }
-
-}
-
-
-/*
-========================================
-CADASTRO
-========================================
-*/
-
-function criarConta() {
-
-    const nome =
-        document
-            .getElementById(
-                "cadastroUsuario"
-            )
-            .value
-            .trim();
-
-
-    const senha =
-        document
-            .getElementById(
-                "cadastroSenha"
-            )
-            .value;
-
-
-    const mensagem =
-        document.getElementById(
-            "mensagemCadastro"
-        );
-
-
-    if (!nome || !senha) {
-
-        mensagem.innerText =
-            "❌ Preencha todos os campos.";
-
-        return;
-
-    }
-
-
-    const usuarios =
-        carregarUsuarios();
-
-
-    if (usuarios[nome]) {
-
-        mensagem.innerText =
-            "❌ Esse usuário já existe.";
-
-        return;
-
-    }
-
-
-    usuarios[nome] = {
-
-        senha: senha
-
-    };
-
-
-    salvarUsuarios(
-        usuarios
-    );
-
-
-    mensagem.innerText =
-        "✅ Conta criada com sucesso!";
-
-
-    document
-        .getElementById(
-            "cadastroUsuario"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "cadastroSenha"
-        )
-        .value = "";
-
-
-    setTimeout(
-        () => {
-
-            mostrar("login");
-
-        },
-        1000
-    );
-
-}
-
-
-/*
-========================================
-LOGIN
-========================================
-*/
-
-function entrar() {
-
-    const nome =
-        document
-            .getElementById(
-                "loginUsuario"
-            )
-            .value
-            .trim();
-
-
-    const senha =
-        document
-            .getElementById(
-                "loginSenha"
-            )
-            .value;
-
-
-    const mensagem =
-        document.getElementById(
-            "mensagemLogin"
-        );
-
-
-    const usuarios =
-        carregarUsuarios();
-
-
-    if (
-        usuarios[nome] &&
-        usuarios[nome].senha === senha
-    ) {
-
-        usuarioLogado =
-            nome;
-
-
-        localStorage.setItem(
-            "usuarioLogado",
-            nome
-        );
-
-
-        mensagem.innerText =
-            "✅ Login realizado!";
-
-
-        setTimeout(
-            () => {
-
-                mostrar("painel");
-
-            },
-            500
-        );
-
-    }
-
-    else {
-
-        mensagem.innerText =
-            "❌ Usuário ou senha incorretos.";
-
-    }
-
-}
-
-
-/*
-========================================
-PAINEL
-========================================
-*/
-
-function atualizarPainel() {
-
-    const elemento =
-        document.getElementById(
-            "bemVindo"
-        );
-
-
-    if (usuarioLogado) {
-
-        elemento.innerText =
-            "Seja bem-vindo(a), " +
-            usuarioLogado + "!";
-
-    }
-
-}
-
-
-function atualizarConfiguracoes() {
-
-    const elemento =
-        document.getElementById(
-            "usuarioAtual"
-        );
-
-
-    elemento.innerText =
-        usuarioLogado || "Nenhum";
-
-}
-
-
-/*
-========================================
-LOGOUT
-========================================
-*/
-
-function sair() {
-
-    usuarioLogado = null;
-
-    localStorage.removeItem(
-        "usuarioLogado"
-    );
-
-
-    document
-        .getElementById(
-            "loginUsuario"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "loginSenha"
-        )
-        .value = "";
-
-
-    mostrar("login");
-
-}
-
-
-/*
-========================================
-EXCLUIR CONTA
-========================================
-*/
-
-function excluirConta() {
-
-    if (!usuarioLogado) {
-
-        return;
-
-    }
-
-
-    const senha =
-        document
-            .getElementById(
-                "excluirSenha"
-            )
-            .value;
-
-
-    const mensagem =
-        document.getElementById(
-            "mensagemExcluir"
-        );
-
-
-    const usuarios =
-        carregarUsuarios();
-
-
-    if (
-        !usuarios[usuarioLogado] ||
-        usuarios[usuarioLogado].senha !== senha
-    ) {
-
-        mensagem.innerText =
-            "❌ Senha incorreta.";
-
-        return;
-
-    }
-
-
-    const confirmacao =
-        confirm(
-            "Tem certeza que deseja excluir sua conta?"
-        );
-
-
-    if (!confirmacao) {
-
-        mensagem.innerText =
-            "Exclusão cancelada.";
-
-        return;
-
-    }
-
-
-    delete usuarios[
-        usuarioLogado
-    ];
-
-
-    salvarUsuarios(
-        usuarios
-    );
-
-
-    localStorage.removeItem(
-        "usuarioLogado"
-    );
-
-
-    usuarioLogado = null;
-
-
-    mensagem.innerText =
-        "✅ Conta excluída.";
-
-
-    setTimeout(
-        () => {
-
-            mostrar("login");
-
-        },
-        1000
-    );
-
-}
-
-
-/*
-========================================
-CALCULADORA
-========================================
-*/
-
-function calcular() {
-
-    const numero1 =
-        Number(
-            document
-                .getElementById(
-                    "numero1"
-                )
-                .value
-        );
-
-
-    const numero2 =
-        Number(
-            document
-                .getElementById(
-                    "numero2"
-                )
-                .value
-        );
-
-
-    const operacao =
-        document
-            .getElementById(
-                "operacao"
-            )
-            .value;
-
-
-    const resultado =
-        document.getElementById(
-            "resultado"
-        );
-
-
-    let valor;
-
-
-    if (
-        Number.isNaN(numero1) ||
-        Number.isNaN(numero2)
-    ) {
-
-        resultado.innerText =
-            "Digite dois números.";
-
-        return;
-
-    }
-
-
-    switch (operacao) {
-
-        case "+":
-
-            valor =
-                numero1 +
-                numero2;
-
-            break;
-
-
-        case "-":
-
-            valor =
-                numero1 -
-                numero2;
-
-            break;
-
-
-        case "*":
-
-            valor =
-                numero1 *
-                numero2;
-
-            break;
-
-
-        case "/":
-
-            if (numero2 === 0) {
-
-                resultado.innerText =
-                    "❌ Não é possível dividir por zero.";
-
-                return;
-
-            }
-
-            valor =
-                numero1 /
-                numero2;
-
-            break;
-
-    }
-
-
-    resultado.innerText =
-        "Resultado: " +
-        valor;
-
-}
-
-
-/*
-========================================
-VERIFICAR NFC
-========================================
-*/
-
-async function verificarNFC() {
-
-    if (!("NDEFReader" in window)) {
-
-        alert(
-            "❌ Web NFC não está disponível neste navegador."
-        );
-
-        return false;
-
-    }
-
-
-    try {
-
-        const ndef =
-            new NDEFReader();
-
-
-        await ndef.scan();
-
-
-        alert(
-            "📲 Aproxime o cartão NFC..."
-        );
-
-
-        return await new Promise(
-            (resolve) => {
-
-                let finalizado =
-                    false;
-
-
-                ndef.addEventListener(
-                    "reading",
-                    ({ serialNumber }) => {
-
-                        if (finalizado) {
-
-                            return;
-
-                        }
-
-
-                        finalizado =
-                            true;
-
-
-                        console.log(
-                            "Cartão detectado:",
-                            serialNumber
-                        );
-
-
-                        if (
-                            serialNumber ===
-                            "d7:4c:70:b1"
-                        ) {
-
-                            alert(
-                                "✅ Cartão autorizado!"
-                            );
-
-
-                            resolve(
-                                true
-                            );
-
-                        }
-
-                        else {
-
-                            alert(
-                                "❌ Cartão não autorizado."
-                            );
-
-
-                            resolve(
-                                false
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                ndef.addEventListener(
-                    "readingerror",
-                    () => {
-
-                        if (finalizado) {
-
-                            return;
-
-                        }
-
-
-                        finalizado =
-                            true;
-
-
-                        alert(
-                            "❌ Não foi possível ler o cartão."
-                        );
-
-
-                        resolve(
-                            false
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-    catch (erro) {
-
-        console.error(
-            erro
-        );
-
-
-        alert(
-            "❌ Erro ao iniciar o NFC:\n" +
-            erro.message
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/*
-========================================
-AVALIAÇÕES
-========================================
-*/
-
-async function verAvaliacoes() {
-
-    const autorizado =
-        await verificarNFC();
-
-
-    if (!autorizado) {
-
-        return;
-
-    }
-
-
-    mostrar(
-        "avaliacoes"
-    );
-
-}
-
-
-function carregarListaAvaliacoes() {
-
-    const lista =
-        document.getElementById(
-            "listaAvaliacoes"
-        );
-
-
-    const avaliacoes =
-        carregarAvaliacoes();
-
-
-    lista.innerHTML = "";
-
-
-    if (
-        avaliacoes.length === 0
-    ) {
-
-        lista.innerHTML =
-            "<p>Não há avaliações.</p>";
-
-        return;
-
-    }
-
-
-    avaliacoes.forEach(
-        avaliacao => {
-
-            const elemento =
-                document.createElement(
-                    "div"
-                );
-
-
-            elemento.className =
-                "avaliacao";
-
-
-            elemento.innerHTML =
-
-                "<strong>" +
-                escapeHTML(
-                    avaliacao.nome
-                ) +
-                "</strong>" +
-
-                "<div class='nota'>" +
-                "⭐ " +
-                avaliacao.nota +
-                "/10" +
-                "</div>" +
-
-                "<p>" +
-                escapeHTML(
-                    avaliacao.comentario
-                ) +
-                "</p>";
-
-
-            lista.appendChild(
-                elemento
+            throw new Error(
+                "Acesso não autorizado."
             );
 
         }
-    );
-
-}
 
 
-async function enviarAvaliacao() {
+        /*
+        ========================================
+        AUTORIZAÇÃO USADA
+        ========================================
+        */
 
-    if (!usuarioLogado) {
-
-        return;
-
-    }
-
-
-    const nota =
-        Number(
-            document
-                .getElementById(
-                    "nota"
-                )
-                .value
+        sessionStorage.removeItem(
+            "acessoSistema"
         );
 
+    </script>
 
-    const comentario =
-        document
-            .getElementById(
-                "comentario"
-            )
-            .value
-            .trim();
 
+    <style>
 
-    const mensagem =
-        document.getElementById(
-            "mensagemAvaliacao"
-        );
+        * {
+            box-sizing: border-box;
+        }
 
 
-    if (
-        nota < 1 ||
-        nota > 10 ||
-        !Number.isInteger(nota)
-    ) {
+        body {
 
-        mensagem.innerText =
-            "❌ A nota deve ser de 1 a 10.";
+            margin: 0;
 
-        return;
+            min-height: 100vh;
 
-    }
+            font-family: Arial, sans-serif;
 
+            background: #111;
 
-    if (!comentario) {
-
-        mensagem.innerText =
-            "❌ Digite um comentário.";
-
-        return;
-
-    }
-
-
-    const avaliacoes =
-        carregarAvaliacoes();
-
-
-    avaliacoes.push({
-
-        nome:
-            usuarioLogado,
-
-        nota:
-            nota,
-
-        comentario:
-            comentario
-
-    });
-
-
-    salvarAvaliacoes(
-        avaliacoes
-    );
-
-
-    mensagem.innerText =
-        "✅ Avaliação enviada!";
-
-
-    document
-        .getElementById(
-            "nota"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "comentario"
-        )
-        .value = "";
-
-}
-
-
-/*
-========================================
-LIMPAR AVALIAÇÕES
-========================================
-*/
-
-async function limparAvaliacoes() {
-
-    const autorizado =
-        await verificarNFC();
-
-
-    if (!autorizado) {
-
-        return;
-
-    }
-
-
-    const confirmacao =
-        confirm(
-            "Tem certeza que deseja apagar todas as avaliações?"
-        );
-
-
-    if (!confirmacao) {
-
-        return;
-
-    }
-
-
-    localStorage.removeItem(
-        "avaliacoes"
-    );
-
-
-    carregarListaAvaliacoes();
-
-
-    alert(
-        "✅ Todas as avaliações foram apagadas."
-    );
-
-}
-
-
-/*
-========================================
-SEGURANÇA DO TEXTO
-========================================
-*/
-
-function escapeHTML(texto) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        texto;
-
-
-    return div.innerHTML;
-
-}
-
-
-/*
-========================================
-INÍCIO
-========================================
-*/
-
-window.addEventListener(
-    "load",
-    () => {
-
-        if (usuarioLogado) {
-
-            mostrar("painel");
+            color: white;
 
         }
 
-        else {
 
-            mostrar("login");
+        .container {
+
+            width: 100%;
+
+            max-width: 500px;
+
+            margin: auto;
+
+            padding: 25px;
 
         }
 
-    }
-);
+
+        .tela {
+
+            display: none;
+
+        }
+
+
+        .ativa {
+
+            display: block;
+
+        }
+
+
+        .card {
+
+            background: #1e1e1e;
+
+            padding: 25px;
+
+            border-radius: 18px;
+
+            margin-top: 20px;
+
+            box-shadow:
+                0 0 20px
+                rgba(0, 0, 0, 0.4);
+
+        }
+
+
+        h1,
+        h2 {
+
+            text-align: center;
+
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 13px;
+
+            margin: 8px 0;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #333;
+
+            color: white;
+
+            font-size: 16px;
+
+        }
+
+
+        button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            margin-top: 10px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: #333;
+
+            color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+        }
+
+
+        button:hover {
+
+            background: #444;
+
+        }
+
+
+        .verde {
+
+            background: #176b2c;
+
+        }
+
+
+        .vermelho {
+
+            background: #8b2020;
+
+        }
+
+
+        .azul {
+
+            background: #175a8a;
+
+        }
+
+
+        .mensagem {
+
+            margin-top: 15px;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: #292929;
+
+            text-align: center;
+
+        }
+
+
+        .menu {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 10px;
+
+        }
+
+
+        .resultado {
+
+            margin-top: 15px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #292929;
+
+            font-size: 22px;
+
+            text-align: center;
+
+        }
+
+
+        .avaliacao {
+
+            background: #292929;
+
+            padding: 15px;
+
+            margin-top: 10px;
+
+            border-radius: 10px;
+
+        }
+
+
+        .nota {
+
+            font-size: 24px;
+
+        }
+
+
+        hr {
+
+            border: 0;
+
+            border-top:
+                1px solid #444;
+
+            margin: 25px 0;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+    <!-- ======================================== -->
+    <!-- LOGIN -->
+    <!-- ======================================== -->
+
+    <section
+        id="login"
+        class="tela ativa"
+    >
+
+        <div class="card">
+
+            <h1>🔐 Login</h1>
+
+            <p>
+                Entre no sistema.
+            </p>
+
+            <input
+                id="loginUsuario"
+                type="text"
+                placeholder="Usuário"
+            >
+
+            <input
+                id="loginSenha"
+                type="password"
+                placeholder="Senha"
+            >
+
+            <button
+                class="azul"
+                onclick="entrar()"
+            >
+                Entrar
+            </button>
+
+            <button
+                onclick="mostrar('cadastro')"
+            >
+                Criar conta
+            </button>
+
+            <div
+                id="mensagemLogin"
+                class="mensagem"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- CADASTRO -->
+    <!-- ======================================== -->
+
+    <section
+        id="cadastro"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h1>👤 Criar conta</h1>
+
+            <input
+                id="cadastroUsuario"
+                type="text"
+                placeholder="Escolha um usuário"
+            >
+
+            <input
+                id="cadastroSenha"
+                type="password"
+                placeholder="Escolha uma senha"
+            >
+
+            <button
+                class="verde"
+                onclick="criarConta()"
+            >
+                Criar conta
+            </button>
+
+            <button
+                onclick="mostrar('login')"
+            >
+                Voltar
+            </button>
+
+            <div
+                id="mensagemCadastro"
+                class="mensagem"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- PAINEL -->
+    <!-- ======================================== -->
+
+    <section
+        id="painel"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h1>🏠 Sistema</h1>
+
+            <p id="bemVindo"></p>
+
+            <div class="menu">
+
+                <button
+                    onclick="mostrar('calculadora')"
+                >
+                    🧮 Calculadora
+                </button>
+
+                <button
+                    onclick="mostrar('configuracoes')"
+                >
+                    ⚙️ Configurações
+                </button>
+
+                <button
+                    onclick="mostrar('avaliacao')"
+                >
+                    ⭐ Avaliar
+                </button>
+
+                <button
+                    onclick="verAvaliacoes()"
+                >
+                    📋 Avaliações
+                </button>
+
+            </div>
+
+            <button
+                class="vermelho"
+                onclick="sair()"
+            >
+                🚪 Sair
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- CALCULADORA -->
+    <!-- ======================================== -->
+
+    <section
+        id="calculadora"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h2>🧮 Calculadora</h2>
+
+            <input
+                id="numero1"
+                type="number"
+                placeholder="Primeiro número"
+            >
+
+            <select id="operacao">
+
+                <option value="+">
+                    Somar
+                </option>
+
+                <option value="-">
+                    Subtrair
+                </option>
+
+                <option value="*">
+                    Multiplicar
+                </option>
+
+                <option value="/">
+                    Dividir
+                </option>
+
+            </select>
+
+            <input
+                id="numero2"
+                type="number"
+                placeholder="Segundo número"
+            >
+
+            <button
+                class="azul"
+                onclick="calcular()"
+            >
+                Calcular
+            </button>
+
+            <div
+                id="resultado"
+                class="resultado"
+            >
+                Resultado
+            </div>
+
+            <button
+                onclick="mostrar('painel')"
+            >
+                Voltar
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- CONFIGURAÇÕES -->
+    <!-- ======================================== -->
+
+    <section
+        id="configuracoes"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h2>⚙️ Configurações</h2>
+
+            <p>
+                Usuário atual:
+            </p>
+
+            <strong id="usuarioAtual"></strong>
+
+            <hr>
+
+            <button
+                class="vermelho"
+                onclick="mostrar('excluir')"
+            >
+                🗑️ Excluir conta
+            </button>
+
+            <button
+                onclick="mostrar('painel')"
+            >
+                Voltar
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- EXCLUIR CONTA -->
+    <!-- ======================================== -->
+
+    <section
+        id="excluir"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h2>🗑️ Excluir conta</h2>
+
+            <p>
+                Digite sua senha para confirmar.
+            </p>
+
+            <input
+                id="excluirSenha"
+                type="password"
+                placeholder="Sua senha"
+            >
+
+            <button
+                class="vermelho"
+                onclick="excluirConta()"
+            >
+                Excluir minha conta
+            </button>
+
+            <button
+                onclick="mostrar('configuracoes')"
+            >
+                Cancelar
+            </button>
+
+            <div
+                id="mensagemExcluir"
+                class="mensagem"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- AVALIAÇÃO -->
+    <!-- ======================================== -->
+
+    <section
+        id="avaliacao"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h2>⭐ Avaliação</h2>
+
+            <p>
+                De 1 a 10, qual nota você dá?
+            </p>
+
+            <input
+                id="nota"
+                type="number"
+                min="1"
+                max="10"
+                placeholder="Nota"
+            >
+
+            <input
+                id="comentario"
+                type="text"
+                placeholder="Seu comentário"
+            >
+
+            <button
+                class="verde"
+                onclick="enviarAvaliacao()"
+            >
+                Enviar avaliação
+            </button>
+
+            <button
+                onclick="mostrar('painel')"
+            >
+                Voltar
+            </button>
+
+            <div
+                id="mensagemAvaliacao"
+                class="mensagem"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ======================================== -->
+    <!-- VER AVALIAÇÕES -->
+    <!-- ======================================== -->
+
+    <section
+        id="avaliacoes"
+        class="tela"
+    >
+
+        <div class="card">
+
+            <h2>📋 Avaliações</h2>
+
+            <div
+                id="listaAvaliacoes"
+            ></div>
+
+            <button
+                class="vermelho"
+                onclick="limparAvaliacoes()"
+            >
+                🗑️ Limpar avaliações
+            </button>
+
+            <button
+                onclick="mostrar('painel')"
+            >
+                Voltar
+            </button>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+<!-- ======================================== -->
+<!-- JAVASCRIPT DO SISTEMA -->
+<!-- ======================================== -->
+
+<script src="app.js"></script>
+
+
+</body>
+
+    </html>
