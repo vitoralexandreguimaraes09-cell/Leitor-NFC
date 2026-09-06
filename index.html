@@ -13,71 +13,6 @@
     <title>Sistema</title>
 
 
-    <!-- ======================================== -->
-    <!-- PROTEÇÃO NFC -->
-    <!-- ======================================== -->
-
-    <script>
-
-        const acesso =
-            sessionStorage.getItem(
-                "acessoSistema"
-            );
-
-
-        if (!acesso) {
-
-            document.documentElement.innerHTML = `
-
-                <body style="
-                    margin: 0;
-                    min-height: 100vh;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background: #111;
-                    color: white;
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                ">
-
-                    <div>
-
-                        <h1>
-                            🚫 Acesso bloqueado
-                        </h1>
-
-                        <p>
-                            Você precisa passar o cartão NFC
-                            para acessar este sistema.
-                        </p>
-
-                    </div>
-
-                </body>
-
-            `;
-
-            throw new Error(
-                "Acesso não autorizado."
-            );
-
-        }
-
-
-        /*
-        ========================================
-        AUTORIZAÇÃO USADA
-        ========================================
-        */
-
-        sessionStorage.removeItem(
-            "acessoSistema"
-        );
-
-    </script>
-
-
     <style>
 
         * {
@@ -85,6 +20,7 @@
         }
 
 
+        html,
         body {
 
             margin: 0;
@@ -99,6 +35,89 @@
 
         }
 
+
+        body {
+
+            min-height: 100vh;
+
+        }
+
+
+        /*
+        ========================================
+        SISTEMA ESCONDIDO ATÉ AUTORIZAR
+        ========================================
+        */
+
+        #sistema {
+
+            display: none;
+
+        }
+
+
+        /*
+        ========================================
+        TELA DE BLOQUEIO
+        ========================================
+        */
+
+        #bloqueio {
+
+            position: fixed;
+
+            inset: 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: #111;
+
+            color: white;
+
+            z-index: 999999;
+
+            padding: 20px;
+
+            text-align: center;
+
+        }
+
+
+        #bloqueio .bloqueio-card {
+
+            width: 100%;
+
+            max-width: 400px;
+
+            background: #1e1e1e;
+
+            padding: 30px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 0 20px
+                rgba(0, 0, 0, 0.5);
+
+        }
+
+
+        #bloqueio h1 {
+
+            margin-top: 0;
+
+        }
+
+
+        /*
+        ========================================
+        SISTEMA
+        ========================================
+        */
 
         .container {
 
@@ -302,423 +321,550 @@
 
     </style>
 
+
+    <!-- ======================================== -->
+    <!-- VERIFICAÇÃO INICIAL -->
+    <!-- ======================================== -->
+
+    <script>
+
+        function verificarAcessoPagina() {
+
+            const acesso =
+                sessionStorage.getItem(
+                    "acessoSistema"
+                );
+
+
+            if (acesso) {
+
+                return true;
+
+            }
+
+
+            return false;
+
+        }
+
+
+        /*
+        ========================================
+        SE NÃO TIVER ACESSO
+        ========================================
+        */
+
+        if (!verificarAcessoPagina()) {
+
+            document.documentElement.classList.add(
+                "sem-acesso"
+            );
+
+        }
+
+    </script>
+
+
+    <style>
+
+        /*
+        Se não houver autorização,
+        esconde completamente o sistema.
+        */
+
+        html.sem-acesso #sistema {
+
+            display: none !important;
+
+        }
+
+    </style>
+
 </head>
 
 
 <body>
 
-<div class="container">
-
 
     <!-- ======================================== -->
-    <!-- LOGIN -->
+    <!-- BLOQUEIO -->
     <!-- ======================================== -->
 
-    <section
-        id="login"
-        class="tela ativa"
-    >
+    <div id="bloqueio">
 
-        <div class="card">
+        <div class="bloqueio-card">
 
-            <h1>🔐 Login</h1>
+            <h1>
+                🚫 Acesso bloqueado
+            </h1>
 
             <p>
-                Entre no sistema.
+                Você precisa passar o cartão NFC
+                para acessar este sistema.
             </p>
 
-            <input
-                id="loginUsuario"
-                type="text"
-                placeholder="Usuário"
+        </div>
+
+    </div>
+
+
+    <!-- ======================================== -->
+    <!-- SISTEMA -->
+    <!-- ======================================== -->
+
+    <div id="sistema">
+
+        <div class="container">
+
+
+            <!-- LOGIN -->
+
+            <section
+                id="login"
+                class="tela ativa"
             >
 
-            <input
-                id="loginSenha"
-                type="password"
-                placeholder="Senha"
+                <div class="card">
+
+                    <h1>🔐 Login</h1>
+
+                    <p>
+                        Entre no sistema.
+                    </p>
+
+                    <input
+                        id="loginUsuario"
+                        type="text"
+                        placeholder="Usuário"
+                    >
+
+                    <input
+                        id="loginSenha"
+                        type="password"
+                        placeholder="Senha"
+                    >
+
+                    <button
+                        class="azul"
+                        onclick="entrar()"
+                    >
+                        Entrar
+                    </button>
+
+                    <button
+                        onclick="mostrar('cadastro')"
+                    >
+                        Criar conta
+                    </button>
+
+                    <div
+                        id="mensagemLogin"
+                        class="mensagem"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CADASTRO -->
+
+            <section
+                id="cadastro"
+                class="tela"
             >
 
-            <button
-                class="azul"
-                onclick="entrar()"
-            >
-                Entrar
-            </button>
+                <div class="card">
 
-            <button
-                onclick="mostrar('cadastro')"
-            >
-                Criar conta
-            </button>
+                    <h1>👤 Criar conta</h1>
 
-            <div
-                id="mensagemLogin"
-                class="mensagem"
-            ></div>
+                    <input
+                        id="cadastroUsuario"
+                        type="text"
+                        placeholder="Escolha um usuário"
+                    >
+
+                    <input
+                        id="cadastroSenha"
+                        type="password"
+                        placeholder="Escolha uma senha"
+                    >
+
+                    <button
+                        class="verde"
+                        onclick="criarConta()"
+                    >
+                        Criar conta
+                    </button>
+
+                    <button
+                        onclick="mostrar('login')"
+                    >
+                        Voltar
+                    </button>
+
+                    <div
+                        id="mensagemCadastro"
+                        class="mensagem"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PAINEL -->
+
+            <section
+                id="painel"
+                class="tela"
+            >
+
+                <div class="card">
+
+                    <h1>🏠 Sistema</h1>
+
+                    <p id="bemVindo"></p>
+
+                    <div class="menu">
+
+                        <button
+                            onclick="mostrar('calculadora')"
+                        >
+                            🧮 Calculadora
+                        </button>
+
+                        <button
+                            onclick="mostrar('configuracoes')"
+                        >
+                            ⚙️ Configurações
+                        </button>
+
+                        <button
+                            onclick="mostrar('avaliacao')"
+                        >
+                            ⭐ Avaliar
+                        </button>
+
+                        <button
+                            onclick="verAvaliacoes()"
+                        >
+                            📋 Avaliações
+                        </button>
+
+                    </div>
+
+                    <button
+                        class="vermelho"
+                        onclick="sair()"
+                    >
+                        🚪 Sair
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- CALCULADORA -->
+
+            <section
+                id="calculadora"
+                class="tela"
+            >
+
+                <div class="card">
+
+                    <h2>🧮 Calculadora</h2>
+
+                    <input
+                        id="numero1"
+                        type="number"
+                        placeholder="Primeiro número"
+                    >
+
+                    <select id="operacao">
+
+                        <option value="+">
+                            Somar
+                        </option>
+
+                        <option value="-">
+                            Subtrair
+                        </option>
+
+                        <option value="*">
+                            Multiplicar
+                        </option>
+
+                        <option value="/">
+                            Dividir
+                        </option>
+
+                    </select>
+
+                    <input
+                        id="numero2"
+                        type="number"
+                        placeholder="Segundo número"
+                    >
+
+                    <button
+                        class="azul"
+                        onclick="calcular()"
+                    >
+                        Calcular
+                    </button>
+
+                    <div
+                        id="resultado"
+                        class="resultado"
+                    >
+                        Resultado
+                    </div>
+
+                    <button
+                        onclick="mostrar('painel')"
+                    >
+                        Voltar
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- CONFIGURAÇÕES -->
+
+            <section
+                id="configuracoes"
+                class="tela"
+            >
+
+                <div class="card">
+
+                    <h2>⚙️ Configurações</h2>
+
+                    <p>
+                        Usuário atual:
+                    </p>
+
+                    <strong id="usuarioAtual"></strong>
+
+                    <hr>
+
+                    <button
+                        class="vermelho"
+                        onclick="excluirConta()"
+                    >
+                        🗑️ Excluir conta
+                    </button>
+
+                    <button
+                        onclick="mostrar('painel')"
+                    >
+                        Voltar
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- AVALIAÇÃO -->
+
+            <section
+                id="avaliacao"
+                class="tela"
+            >
+
+                <div class="card">
+
+                    <h2>⭐ Avaliação</h2>
+
+                    <p>
+                        De 1 a 10, qual nota você dá?
+                    </p>
+
+                    <input
+                        id="nota"
+                        type="number"
+                        min="1"
+                        max="10"
+                        placeholder="Nota"
+                    >
+
+                    <input
+                        id="comentario"
+                        type="text"
+                        placeholder="Seu comentário"
+                    >
+
+                    <button
+                        class="verde"
+                        onclick="enviarAvaliacao()"
+                    >
+                        Enviar avaliação
+                    </button>
+
+                    <button
+                        onclick="mostrar('painel')"
+                    >
+                        Voltar
+                    </button>
+
+                    <div
+                        id="mensagemAvaliacao"
+                        class="mensagem"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- AVALIAÇÕES -->
+
+            <section
+                id="avaliacoes"
+                class="tela"
+            >
+
+                <div class="card">
+
+                    <h2>📋 Avaliações</h2>
+
+                    <div
+                        id="listaAvaliacoes"
+                    ></div>
+
+                    <button
+                        class="vermelho"
+                        onclick="limparAvaliacoes()"
+                    >
+                        🗑️ Limpar avaliações
+                    </button>
+
+                    <button
+                        onclick="mostrar('painel')"
+                    >
+                        Voltar
+                    </button>
+
+                </div>
+
+            </section>
+
 
         </div>
 
-    </section>
+    </div>
 
 
     <!-- ======================================== -->
-    <!-- CADASTRO -->
+    <!-- APP.JS -->
     <!-- ======================================== -->
 
-    <section
-        id="cadastro"
-        class="tela"
-    >
-
-        <div class="card">
-
-            <h1>👤 Criar conta</h1>
-
-            <input
-                id="cadastroUsuario"
-                type="text"
-                placeholder="Escolha um usuário"
-            >
-
-            <input
-                id="cadastroSenha"
-                type="password"
-                placeholder="Escolha uma senha"
-            >
-
-            <button
-                class="verde"
-                onclick="criarConta()"
-            >
-                Criar conta
-            </button>
-
-            <button
-                onclick="mostrar('login')"
-            >
-                Voltar
-            </button>
-
-            <div
-                id="mensagemCadastro"
-                class="mensagem"
-            ></div>
-
-        </div>
-
-    </section>
+    <script src="app.js"></script>
 
 
     <!-- ======================================== -->
-    <!-- PAINEL -->
+    <!-- CONTROLE FINAL DA PÁGINA -->
     <!-- ======================================== -->
 
-    <section
-        id="painel"
-        class="tela"
-    >
+    <script>
 
-        <div class="card">
+        function atualizarBloqueioPagina() {
 
-            <h1>🏠 Sistema</h1>
+            const acesso =
+                sessionStorage.getItem(
+                    "acessoSistema"
+                );
 
-            <p id="bemVindo"></p>
 
-            <div class="menu">
+            const sistema =
+                document.getElementById(
+                    "sistema"
+                );
 
-                <button
-                    onclick="mostrar('calculadora')"
-                >
-                    🧮 Calculadora
-                </button>
 
-                <button
-                    onclick="mostrar('configuracoes')"
-                >
-                    ⚙️ Configurações
-                </button>
+            const bloqueio =
+                document.getElementById(
+                    "bloqueio"
+                );
 
-                <button
-                    onclick="mostrar('avaliacao')"
-                >
-                    ⭐ Avaliar
-                </button>
 
-                <button
-                    onclick="verAvaliacoes()"
-                >
-                    📋 Avaliações
-                </button>
+            if (acesso) {
 
-            </div>
+                sistema.style.display =
+                    "block";
 
-            <button
-                class="vermelho"
-                onclick="sair()"
-            >
-                🚪 Sair
-            </button>
+                bloqueio.style.display =
+                    "none";
 
-        </div>
+            }
 
-    </section>
+            else {
 
+                sistema.style.display =
+                    "none";
 
-    <!-- ======================================== -->
-    <!-- CALCULADORA -->
-    <!-- ======================================== -->
+                bloqueio.style.display =
+                    "flex";
 
-    <section
-        id="calculadora"
-        class="tela"
-    >
+            }
 
-        <div class="card">
+        }
 
-            <h2>🧮 Calculadora</h2>
 
-            <input
-                id="numero1"
-                type="number"
-                placeholder="Primeiro número"
-            >
+        window.addEventListener(
+            "pageshow",
+            () => {
 
-            <select id="operacao">
+                atualizarBloqueioPagina();
 
-                <option value="+">
-                    Somar
-                </option>
+            }
+        );
 
-                <option value="-">
-                    Subtrair
-                </option>
 
-                <option value="*">
-                    Multiplicar
-                </option>
+        window.addEventListener(
+            "load",
+            () => {
 
-                <option value="/">
-                    Dividir
-                </option>
+                const acesso =
+                    sessionStorage.getItem(
+                        "acessoSistema"
+                    );
 
-            </select>
 
-            <input
-                id="numero2"
-                type="number"
-                placeholder="Segundo número"
-            >
+                if (acesso) {
 
-            <button
-                class="azul"
-                onclick="calcular()"
-            >
-                Calcular
-            </button>
+                    /*
+                    O acesso é consumido
+                    depois que o index foi aberto.
+                    */
 
-            <div
-                id="resultado"
-                class="resultado"
-            >
-                Resultado
-            </div>
+                    sessionStorage.removeItem(
+                        "acessoSistema"
+                    );
 
-            <button
-                onclick="mostrar('painel')"
-            >
-                Voltar
-            </button>
 
-        </div>
+                    atualizarBloqueioPagina();
 
-    </section>
+                }
 
+                else {
 
-    <!-- ======================================== -->
-    <!-- CONFIGURAÇÕES -->
-    <!-- ======================================== -->
+                    atualizarBloqueioPagina();
 
-    <section
-        id="configuracoes"
-        class="tela"
-    >
+                }
 
-        <div class="card">
+            }
+        );
 
-            <h2>⚙️ Configurações</h2>
-
-            <p>
-                Usuário atual:
-            </p>
-
-            <strong id="usuarioAtual"></strong>
-
-            <hr>
-
-            <button
-                class="vermelho"
-                onclick="mostrar('excluir')"
-            >
-                🗑️ Excluir conta
-            </button>
-
-            <button
-                onclick="mostrar('painel')"
-            >
-                Voltar
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- ======================================== -->
-    <!-- EXCLUIR CONTA -->
-    <!-- ======================================== -->
-
-    <section
-        id="excluir"
-        class="tela"
-    >
-
-        <div class="card">
-
-            <h2>🗑️ Excluir conta</h2>
-
-            <p>
-                Digite sua senha para confirmar.
-            </p>
-
-            <input
-                id="excluirSenha"
-                type="password"
-                placeholder="Sua senha"
-            >
-
-            <button
-                class="vermelho"
-                onclick="excluirConta()"
-            >
-                Excluir minha conta
-            </button>
-
-            <button
-                onclick="mostrar('configuracoes')"
-            >
-                Cancelar
-            </button>
-
-            <div
-                id="mensagemExcluir"
-                class="mensagem"
-            ></div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ======================================== -->
-    <!-- AVALIAÇÃO -->
-    <!-- ======================================== -->
-
-    <section
-        id="avaliacao"
-        class="tela"
-    >
-
-        <div class="card">
-
-            <h2>⭐ Avaliação</h2>
-
-            <p>
-                De 1 a 10, qual nota você dá?
-            </p>
-
-            <input
-                id="nota"
-                type="number"
-                min="1"
-                max="10"
-                placeholder="Nota"
-            >
-
-            <input
-                id="comentario"
-                type="text"
-                placeholder="Seu comentário"
-            >
-
-            <button
-                class="verde"
-                onclick="enviarAvaliacao()"
-            >
-                Enviar avaliação
-            </button>
-
-            <button
-                onclick="mostrar('painel')"
-            >
-                Voltar
-            </button>
-
-            <div
-                id="mensagemAvaliacao"
-                class="mensagem"
-            ></div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ======================================== -->
-    <!-- VER AVALIAÇÕES -->
-    <!-- ======================================== -->
-
-    <section
-        id="avaliacoes"
-        class="tela"
-    >
-
-        <div class="card">
-
-            <h2>📋 Avaliações</h2>
-
-            <div
-                id="listaAvaliacoes"
-            ></div>
-
-            <button
-                class="vermelho"
-                onclick="limparAvaliacoes()"
-            >
-                🗑️ Limpar avaliações
-            </button>
-
-            <button
-                onclick="mostrar('painel')"
-            >
-                Voltar
-            </button>
-
-        </div>
-
-    </section>
-
-
-</div>
-
-
-<!-- ======================================== -->
-<!-- JAVASCRIPT DO SISTEMA -->
-<!-- ======================================== -->
-
-<script src="app.js"></script>
+    </script>
 
 
 </body>
 
-    </html>
+</html>
