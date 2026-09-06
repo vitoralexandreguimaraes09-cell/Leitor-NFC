@@ -23,17 +23,27 @@ function carregarUsuarios() {
             "usuarios"
         );
 
+
     if (!dados) {
+
         return {};
+
     }
+
 
     try {
 
-        return JSON.parse(dados);
+        return JSON.parse(
+            dados
+        );
 
-    } catch (erro) {
+    }
 
-        console.error(erro);
+    catch (erro) {
+
+        console.error(
+            erro
+        );
 
         return {};
 
@@ -42,11 +52,15 @@ function carregarUsuarios() {
 }
 
 
-function salvarUsuarios(usuarios) {
+function salvarUsuarios(
+    usuarios
+) {
 
     localStorage.setItem(
         "usuarios",
-        JSON.stringify(usuarios)
+        JSON.stringify(
+            usuarios
+        )
     );
 
 }
@@ -59,17 +73,27 @@ function carregarAvaliacoes() {
             "avaliacoes"
         );
 
+
     if (!dados) {
+
         return [];
+
     }
+
 
     try {
 
-        return JSON.parse(dados);
+        return JSON.parse(
+            dados
+        );
 
-    } catch (erro) {
+    }
 
-        console.error(erro);
+    catch (erro) {
+
+        console.error(
+            erro
+        );
 
         return [];
 
@@ -78,11 +102,15 @@ function carregarAvaliacoes() {
 }
 
 
-function salvarAvaliacoes(avaliacoes) {
+function salvarAvaliacoes(
+    avaliacoes
+) {
 
     localStorage.setItem(
         "avaliacoes",
-        JSON.stringify(avaliacoes)
+        JSON.stringify(
+            avaliacoes
+        )
     );
 
 }
@@ -101,6 +129,7 @@ function mostrar(id) {
             ".tela"
         );
 
+
     telas.forEach(
         tela => {
 
@@ -113,7 +142,9 @@ function mostrar(id) {
 
 
     const tela =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (tela) {
@@ -338,7 +369,8 @@ function atualizarPainel() {
 
         elemento.innerText =
             "Seja bem-vindo(a), " +
-            usuarioLogado + "!";
+            usuarioLogado +
+            "!";
 
     }
 
@@ -354,7 +386,8 @@ function atualizarConfiguracoes() {
 
 
     elemento.innerText =
-        usuarioLogado || "Nenhum";
+        usuarioLogado ||
+        "Nenhum";
 
 }
 
@@ -367,7 +400,9 @@ LOGOUT
 
 function sair() {
 
-    usuarioLogado = null;
+    usuarioLogado =
+        null;
+
 
     localStorage.removeItem(
         "usuarioLogado"
@@ -401,7 +436,9 @@ NFC
 
 async function verificarNFC() {
 
-    if (!("NDEFReader" in window)) {
+    if (
+        !("NDEFReader" in window)
+    ) {
 
         alert(
             "❌ Web NFC não está disponível neste navegador."
@@ -427,7 +464,7 @@ async function verificarNFC() {
 
 
         return await new Promise(
-            (resolve) => {
+            resolve => {
 
                 let finalizado =
                     false;
@@ -549,14 +586,17 @@ async function excluirConta() {
 
     if (!usuarioLogado) {
 
+        alert(
+            "❌ Nenhum usuário está logado."
+        );
+
         return;
 
     }
 
 
     /*
-    PRIMEIRO:
-    exige o cartão NFC
+    PRIMEIRO NFC
     */
 
     const autorizado =
@@ -570,18 +610,21 @@ async function excluirConta() {
     }
 
 
+    /*
+    DEPOIS PEDE A SENHA
+    */
+
     const senha =
-        document
-            .getElementById(
-                "excluirSenha"
-            )
-            .value;
-
-
-    const mensagem =
-        document.getElementById(
-            "mensagemExcluir"
+        prompt(
+            "Digite sua senha para excluir a conta:"
         );
+
+
+    if (senha === null) {
+
+        return;
+
+    }
 
 
     const usuarios =
@@ -593,8 +636,9 @@ async function excluirConta() {
         usuarios[usuarioLogado].senha !== senha
     ) {
 
-        mensagem.innerText =
-            "❌ Senha incorreta.";
+        alert(
+            "❌ Senha incorreta."
+        );
 
         return;
 
@@ -608,9 +652,6 @@ async function excluirConta() {
 
 
     if (!confirmacao) {
-
-        mensagem.innerText =
-            "Exclusão cancelada.";
 
         return;
 
@@ -636,18 +677,12 @@ async function excluirConta() {
         null;
 
 
-    mensagem.innerText =
-        "✅ Conta excluída.";
-
-
-    setTimeout(
-        () => {
-
-            mostrar("login");
-
-        },
-        1000
+    alert(
+        "✅ Conta excluída."
     );
+
+
+    mostrar("login");
 
 }
 
@@ -741,7 +776,9 @@ function calcular() {
 
         case "/":
 
-            if (numero2 === 0) {
+            if (
+                numero2 === 0
+            ) {
 
                 resultado.innerText =
                     "❌ Não é possível dividir por zero.";
@@ -749,6 +786,7 @@ function calcular() {
                 return;
 
             }
+
 
             valor =
                 numero1 /
@@ -768,11 +806,15 @@ function calcular() {
 
 /*
 ========================================
-AVALIAÇÕES
+VER AVALIAÇÕES
 ========================================
 */
 
 async function verAvaliacoes() {
+
+    /*
+    EXIGE NFC NOVAMENTE
+    */
 
     const autorizado =
         await verificarNFC();
@@ -792,6 +834,12 @@ async function verAvaliacoes() {
 }
 
 
+/*
+========================================
+CARREGAR AVALIAÇÕES
+========================================
+*/
+
 function carregarListaAvaliacoes() {
 
     const lista =
@@ -804,7 +852,8 @@ function carregarListaAvaliacoes() {
         carregarAvaliacoes();
 
 
-    lista.innerHTML = "";
+    lista.innerHTML =
+        "";
 
 
     if (
@@ -862,6 +911,12 @@ function carregarListaAvaliacoes() {
 
 }
 
+
+/*
+========================================
+ENVIAR AVALIAÇÃO
+========================================
+*/
 
 function enviarAvaliacao() {
 
@@ -973,7 +1028,7 @@ LIMPAR AVALIAÇÕES
 async function limparAvaliacoes() {
 
     /*
-    Exige NFC novamente.
+    EXIGE NFC NOVAMENTE
     */
 
     const autorizado =
@@ -1040,7 +1095,7 @@ function escapeHTML(texto) {
 
 /*
 ========================================
-INÍCIO
+INÍCIO DO SISTEMA
 ========================================
 */
 
@@ -1048,134 +1103,28 @@ window.addEventListener(
     "load",
     () => {
 
-        const acesso =
-            sessionStorage.getItem(
-                "acessoSistema"
+        if (
+            !window.nfcAutorizado
+        ) {
+
+            return;
+
+        }
+
+
+        if (usuarioLogado) {
+
+            mostrar(
+                "painel"
             );
-
-
-        if (acesso) {
-
-            /*
-            O index foi aberto pelo teste.html.
-            */
-
-            sessionStorage.removeItem(
-                "acessoSistema"
-            );
-
-
-            document.documentElement
-                .classList.remove(
-                    "sem-acesso"
-                );
-
-
-            const sistema =
-                document.getElementById(
-                    "sistema"
-                );
-
-
-            const bloqueio =
-                document.getElementById(
-                    "bloqueio"
-                );
-
-
-            sistema.style.display =
-                "block";
-
-
-            bloqueio.style.display =
-                "none";
-
-
-            if (usuarioLogado) {
-
-                mostrar("painel");
-
-            }
-
-            else {
-
-                mostrar("login");
-
-            }
 
         }
 
         else {
 
-            const sistema =
-                document.getElementById(
-                    "sistema"
-                );
-
-
-            const bloqueio =
-                document.getElementById(
-                    "bloqueio"
-                );
-
-
-            sistema.style.display =
-                "none";
-
-
-            bloqueio.style.display =
-                "flex";
-
-        }
-
-    }
-);
-
-
-/*
-========================================
-PROTEÇÃO CONTRA VOLTAR/RESTAURAR PÁGINA
-========================================
-*/
-
-window.addEventListener(
-    "pageshow",
-    () => {
-
-        const acesso =
-            sessionStorage.getItem(
-                "acessoSistema"
+            mostrar(
+                "login"
             );
-
-
-        if (!acesso) {
-
-            const sistema =
-                document.getElementById(
-                    "sistema"
-                );
-
-
-            const bloqueio =
-                document.getElementById(
-                    "bloqueio"
-                );
-
-
-            if (sistema) {
-
-                sistema.style.display =
-                    "none";
-
-            }
-
-
-            if (bloqueio) {
-
-                bloqueio.style.display =
-                    "flex";
-
-            }
 
         }
 
